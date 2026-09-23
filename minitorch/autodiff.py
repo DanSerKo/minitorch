@@ -22,8 +22,10 @@ def central_difference(f: Any, *vals: Any, arg: int = 0, epsilon: float = 1e-6) 
     Returns:
         An approximation of $f'_i(x_0, \ldots, x_{n-1})$
     """
-    vals1 = [v + epsilon if i == arg else v for i, v in enumerate(vals)]
-    vals2 = [v - epsilon if i == arg else v for i, v in enumerate(vals)]
+    vals1 = list(vals)
+    vals2 = list(vals)
+    vals1[arg] = vals1[arg] + epsilon
+    vals2[arg] = vals2[arg] - epsilon
     return (f(*vals1) - f(*vals2)) / (2 * epsilon)
 
 
@@ -70,8 +72,7 @@ def topological_sort(variable: Variable) -> Iterable[Variable]:
             return
         if not var.is_leaf():
             for parent in var.parents:
-                if not parent.is_constant():
-                    visit(parent)
+                visit(parent)
         seen.add(var.unique_id)
         order.insert(0, var)
 
@@ -99,11 +100,10 @@ def backpropagate(variable: Variable, deriv: Any) -> None:
             var.accumulate_derivative(d_output)
         else:
             for parent, d in var.chain_rule(d_output):
-                if parent.is_constant():
-                    continue
-                derivatives[parent.unique_id] = (
-                    derivatives.get(parent.unique_id, 0.0) + d
-                )
+                if parent.unique_id in derivatives:
+                    derivatives[parent.unique_id] += d
+                else:
+                    derivatives[parent.unique_id] = d
 
 
 @dataclass

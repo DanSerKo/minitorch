@@ -130,7 +130,10 @@ def map(fn: Callable[[float], float]) -> Callable[[Iterable[float]], Iterable[fl
     """
 
     def apply(ls: Iterable[float]) -> Iterable[float]:
-        return [fn(x) for x in ls]
+        result = []
+        for x in ls:
+            result.append(fn(x))
+        return result
 
     return apply
 
@@ -158,7 +161,10 @@ def zipWith(
     """
 
     def apply(ls1: Iterable[float], ls2: Iterable[float]) -> Iterable[float]:
-        return [fn(x, y) for x, y in zip(ls1, ls2)]
+        result = []
+        for x, y in zip(ls1, ls2):
+            result.append(fn(x, y))
+        return result
 
     return apply
 
